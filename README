@@ -1,0 +1,24 @@
+This repository contains the RPM packaging for building CephFS as a
+kabi-tracking kmod for RHEL 7.
+
+The repository follows the standard layout common to a regular package in the
+Fedora Linux distribution. The package uses a customized kmodtool script,
+modeled after the kmod packages in the ELRepo add-on repository.
+
+There are some notable differences between this package and a "standard"
+package you might find in the Fedora Linux distribution:
+
+* This Git branch is labeled "master", but the package is not intended for
+  Fedora Rawhide. The package is only for RHEL 7 for now.
+
+* In a typical Fedora package, the Source0 tarball would be stored in a
+  lookaside cache in the build infrastructure. With this ceph-kmod package, the
+  source tarball is not stored anywhere. Instead, you can generate a tarball on
+  the fly using the "generate tarball" script.
+
+* There is a "jenkins/build" script. This script runs inside a Jenkins
+  job that builds the entire tarball, source RPM, and binary RPM in mock.
+
+* Instead of a standard ceph-kmod.spec, there is a "ceph-kmod.spec.in" file.
+  The jenkins/build script will generate the regular .spec file dynamically,
+  filling in the appropriate templated values to match the values from Git.

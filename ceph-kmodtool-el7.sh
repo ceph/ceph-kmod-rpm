@@ -129,6 +129,8 @@ get_rpmtemplate ()
     local variant="${1}"
     local dashvariant="${variant:+-${variant}}"
     local dotvariant="${variant:+.${variant}}"
+    local arch=$(arch)
+    local verrelnoarch=$(echo $verrel | sed -e "s/\.$arch.*//")
 
     echo "%package       -n kmod-${kmod_name}${dashvariant}"
 
@@ -160,7 +162,7 @@ EOF
 
     if [ "yes" != "$nobuildreqs" ]
     then
-        echo "BuildRequires: kernel${dashvariant}-devel"
+        echo "BuildRequires: kernel${dashvariant}-devel = ${verrelnoarch}"
     fi
 
     if [ "" != "$override_preamble" ]
@@ -218,6 +220,8 @@ if [ "" == "$override_filelist" ];
 then
     echo "%defattr(644,root,root,755)"
     echo "/lib/modules/${verrel}${dotvariant}"
+    echo "%config /etc/depmod.d/kmod-${kmod_name}.conf"
+    echo "%doc /usr/share/doc/kmod-${kmod_name}-%{version}/"
 else
     cat "$override_filelist" | get_filelist
 fi

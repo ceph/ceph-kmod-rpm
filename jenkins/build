@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Generate the tarball and RPM spec file.
+
+srcdir=$(pwd)
+
+# Call out to the "generate tarball" script.
+. $srcdir/generate-ceph-client-tarball
+
+# Assemble the Red Hat "release" value:
+RPM_DATE=$(date +"%Y%m%d")
+RPM_RELEASE=0.0.${RPM_DATE}git${GIT_SHORT_COMMIT}.el7
+
+# Debugging:
+echo Git tag: ${GIT_TAG}
+echo Git commit: ${GIT_COMMIT}
+echo Git shortcommit: ${GIT_SHORT_COMMIT}
+echo Directory name: ${DIR}
+echo Tarball name: ${TARBALL}
+echo RPM version number: ${RPM_VERSION}
+echo RPM release number: ${RPM_RELEASE}
+
+# Substitute values from Git:
+sed -e "s![@]commitdate[@]!${RPM_DATE}!g"          \
+    -e "s![@]commit[@]!${GIT_COMMIT}!g"              \
+    ${srcdir}/ceph-kmod.spec.in > ${srcdir}/ceph-kmod.spec
+
+# Mock:
+# (We'll use this until fedpkg is availabe on EL7.)
+rm -r ${srcdir}/results_ceph-kmod
+mock -r epel-7-x86_64                 \
+    --buildsrpm                       \
+    --spec ${srcdir}/ceph-kmod.spec   \
+    --sources ${srcdir}               \
+    --resultdir ${srcdir}/results_ceph-kmod/${RPM_VERSION}/${RPM_RELEASE}/
+
+if [[ $? -ne 0 ]]; then
+    echo "problem running mock. Exiting."
+    exit 1
+fi
+
+# Full name to SRPM
+SRPM=ceph-kmod-${RPM_VERSION}-${RPM_RELEASE}.src.rpm
+
+# Move SRPM back to $srcdir. This is where fedpkg would have written it.
+pushd ${srcdir}/results_ceph-kmod/${RPM_VERSION}/${RPM_RELEASE} >/dev/null
+  if [[ ! -f $SRPM ]]; then
+    echo could not find $SRPM in $(pwd).
+    echo Directory contents are:
+    ls
+    echo Please investigate.
+    exit 1
+  fi
+  # If the file is here, then move it out.
+  mv $SRPM ${srcdir}
+popd >/dev/null
+
+# Cleanup.
+rm -r ${srcdir}/results_ceph-kmod
+
+# Full mock build here:
+mock -r epel-7-x86_64 \
+    rebuild $SRPM \
+    --resultdir ${srcdir}/results_ceph-kmod/${RPM_VERSION}/${RPM_RELEASE}/
+
+# If we failed, help to figure out why:
+if [[ $? -ne 0 ]]; then
+    echo "Mock did not exit successfully. Tailing mock's build.log:"
+    tail -80 ${srcdir}/results_ceph-kmod/${RPM_VERSION}/${RPM_RELEASE}/build.log
+    exit 1
+fi
