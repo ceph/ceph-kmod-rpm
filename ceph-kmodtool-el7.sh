@@ -197,7 +197,7 @@ EOF
 
 cat <<EOF
 %preun         -n kmod-${kmod_name}${dashvariant}
-rpm -ql kmod-${kmod_name}${dashvariant}-%{kmod_version}-%{kmod_release}.$(arch) | grep '\.ko$' > /var/run/rpm-kmod-${kmod_name}${dashvariant}-modules
+rpm -ql kmod-${kmod_name}${dashvariant}-%{version}-%{release}.$(arch) | grep '\.ko$' > /var/run/rpm-kmod-${kmod_name}${dashvariant}-modules
 EOF
         
 cat <<EOF
