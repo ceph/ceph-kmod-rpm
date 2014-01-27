@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Look up the version information from Git.
+# Write ceph-kmod.spec and the Makefile for the appropriate tarball
+# generation and mock commands. 
+
+set -e
+
+# Git repo
+git_clone=ceph-client
+git_branch=wip-rhel7
+
+# kmod information
+kmod_name=ceph
+kmod_dir=fs/ceph
+
+if [[ ! -d $git_clone ]]; then
+  echo Please clone https://github.com/ceph/ceph-client to ${git_clone}.
+  echo If building in Jenkins, you can use the Multi SCM plugin to do this.
+  exit 1
+fi
+
+# Get version information
+pushd $git_clone >/dev/null
+  git checkout $git_branch
+  git_tag=$(git describe --abbrev=0 --tags HEAD)
+  git_commit=$(git rev-parse HEAD)
+  git_short_commit=$(git rev-parse --short=7 HEAD)
+popd >/dev/null
+
+if [[ $git_tag != v* ]]; then
+  echo $git_tag does not look like a normal kernel tag. Please verify.
+  exit 1
+fi
+
+# Version number suitable for RPM:
+rpm_version=$(echo $git_tag | sed -e s/^v// -e s/-rc[0-9]*$//)
+
+# Commit date for RPM's Release value:
+commitdate=$(date +"%Y%m%d")
+
+# Interpolated RPM "Release" value:
+rpm_release=0.1.${commitdate}git${git_short_commit}
+
+# Directory name for the files inside ou tarball:
+tarball_dir=${kmod_name}-${rpm_version}-${git_short_commit}
+
+# Tarball file:
+tarball_file=${tarball_dir}.tar.xz
+
+# Similar to autoconf's "srcdir":
+srcdir=$(pwd)
+
+echo "DEBUGGING:"
+echo " - srcdir: ${srcdir}"
+echo " - RPM Version: ${rpm_version}"
+echo " - RPM Release: ${rpm_release}"
+echo " - Git commit: ${git_commit}"
+echo " - Tarball filename: ${tarball_file}"
+echo " - Directory inside tarball: ${tarball_dir}"
+
+# Makefile:
+sed -e "s![@]kmod_name[@]!${kmod_name}!g"           \
+    -e "s![@]rpm_version[@]!${rpm_version}!g"           \
+    -e "s![@]rpm_release[@]!${rpm_release}!g"           \
+    -e "s![@]tarball_file[@]!${tarball_file}!g"         \
+    -e "s![@]srcdir[@]!${srcdir}!g"                     \
+    Makefile.in > Makefile
+
+# ceph-kmod.spec:
+sed -e "s![@]rpm_version[@]!${rpm_version}!g"              \
+    -e "s![@]rpm_release[@]!${rpm_release}!g"              \
+    -e "s![@]tarball_file[@]!${tarball_file}!g"            \
+    -e "s![@]tarball_dir[@]!${tarball_dir}!g"              \
+    ${kmod_name}-kmod.spec.in > ${kmod_name}-kmod.spec

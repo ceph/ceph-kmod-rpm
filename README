@@ -1,6 +1,13 @@
 This repository contains the RPM packaging for building CephFS as a
 kabi-tracking kmod for RHEL 7.
 
+The 30 second synopsis:
+
+  git clone git://... ceph-kmod
+  cd ceph-kmod
+  ./configure
+  make
+
 The repository follows the standard layout common to a regular package in the
 Fedora Linux distribution. The package uses a customized kmodtool script,
 modeled after the kmod packages in the ELRepo add-on repository.
@@ -11,14 +18,24 @@ package you might find in the Fedora Linux distribution:
 * This Git branch is labeled "master", but the package is not intended for
   Fedora Rawhide. The package is only for RHEL 7 for now.
 
+* In a typical Fedora package, you would edit the version numbers in the
+  package by hand, and then run "fedpkg", perhaps with additional arguments. To
+  abstract this away and make it easier to automate for continuous integration,
+  you will find a configure script and Makefile. Just run "./configure && make"
+  to go through the process of building the entire binary RPMs.
+
+* After you run ./configure, you will have a Makefile. A Jenkins job runs
+  "./configure && make" in order to build the entire tarball, source RPM, and
+  binary RPM in mock.
+
 * In a typical Fedora package, the Source0 tarball would be stored in a
-  lookaside cache in the build infrastructure. With this ceph-kmod package, the
-  source tarball is not stored anywhere. Instead, you can generate a tarball on
-  the fly using the "generate tarball" script.
+  lookaside cache in the build infrastructure. With this ceph-kmod package,
+  the source tarball is not stored anywhere. Instead, you can generate a
+  tarball on the fly using the "make tarball" command. (This is a dependency
+  for the "make all"... or "make rpm"... or even just "make". So if you're
+  running any of those, you don't need to run "make tarball" beforehand.)
 
-* There is a "jenkins/build" script. This script runs inside a Jenkins
-  job that builds the entire tarball, source RPM, and binary RPM in mock.
-
-* Instead of a standard ceph-kmod.spec, there is a "ceph-kmod.spec.in" file.
-  The jenkins/build script will generate the regular .spec file dynamically,
-  filling in the appropriate templated values to match the values from Git.
+* Instead of a standard ceph-kmod.spec, there is a "ceph-kmod.spec.in"
+  file. The ./configure script will generate the regular .spec file
+  dynamically, filling in the appropriate templated values to match the values
+  from Git.

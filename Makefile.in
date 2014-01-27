@@ -1,0 +1,65 @@
+# Makefile build RPMs for the ceph kmod.
+#
+# Currently the RPM only supports RHEL 6.
+# Longer term, this RPM_DIST variable will need to be reworked/removed so that
+# we build for multiple dists at once.
+RPM_DIST=el7
+# The kernel module name.
+KMOD_NAME=@kmod_name@
+# "git describe" the kernel tree.
+RPM_VERSION=@rpm_version@
+# "git describe" the kernel tree.
+RPM_RELEASE=@rpm_release@
+# The snapshot tarball.
+TARBALL_FILE=@tarball_file@
+# The source RPM.
+SRPM_FILE=${KMOD_NAME}-kmod-@rpm_version@-@rpm_release@.el7.src.rpm
+# The binary RPM.
+RPM_FILE=${KMOD_NAME}-kmod-@rpm_version@-@rpm_release@.el7.x86_64.rpm
+# Fedpkg will write into this "results" directory by default.
+RESULTS_DIR=results_${KMOD_NAME}-kmod/${RPM_VERSION}/${RPM_RELEASE}/
+# The top-level directory
+srcdir=@srcdir@
+
+.PHONY : all tarball srpm rpm clean
+
+# Easy-to-use target "aliases":
+all : rpm
+tarball: ${TARBALL_FILE}
+srpm: ${SRPM_FILE}
+
+# Real files:
+${TARBALL_FILE}:
+	./generate-${KMOD_NAME}-tarball
+
+sources : ${TARBALL_FILE}
+	md5sum ${TARBALL_FILE} > sources
+
+${SRPM_FILE}: ${TARBALL_FILE}
+	# Use mock to build an SRPM.
+	# (We'll use this until fedpkg is availabe on EL7.)
+	rm -rf ${srcdir}/results_${KMOD_NAME}-kmod/ &&     \
+	mock -r epel-7-x86_64                             \
+		--buildsrpm                               \
+		--spec ${srcdir}/${KMOD_NAME}-kmod.spec   \
+		--sources ${srcdir}                       \
+		--resultdir ${srcdir}/${RESULTS_DIR}/ &&  \
+	mv ${srcdir}/${RESULTS_DIR}/${SRPM_FILE} ${srcdir}
+
+rpm: ${SRPM_FILE}
+	# Use mock to build an SRPM into binary RPMs.
+	# (As above, we'll use this until fedpkg is availabe on EL7.)
+	rm -rf ${srcdir}/results_${KMOD_NAME}-kmod/ &&     \
+	mock -r epel-7-x86_64                             \
+		rebuild ${SRPM_FILE}                      \
+		--resultdir ${srcdir}/${RESULTS_DIR}/
+
+
+# Cleanup:
+clean:
+	rm -rf \
+		sources \
+		${KMOD_NAME}-kmod.spec \
+		${KMOD_NAME}-*.src.rpm \
+		${KMOD_NAME}-*.tar.xz \
+		results_${KMOD_NAME}-kmod/

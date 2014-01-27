@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Check out the tip of a git branch, and construct a simplified tarball that
+# only contains the fs/ceph directory. This will be Source0 for the RPM.
+
+# Some of this code is duplicated from the configure script. A future
+# improvement would be to merge the two somehow.
+
+set -e
+
+# Git repo information.
+git_clone=ceph-client
+git_ref=wip-rhel7
+
+# kmod information.
+kmod_name=ceph
+kmod_dir=fs/ceph
+
+if [[ ! -d $git_clone ]]; then
+  echo Please clone https://github.com/ceph/ceph-client to ${git_clone}.
+  echo If building in Jenkins, you can use the Multi SCM plugin to do this.
+  exit 1
+fi
+
+# Get version information
+pushd $git_clone >/dev/null
+  git checkout $git_branch
+  git_tag=$(git describe --abbrev=0 --tags HEAD)
+  git_short_commit=$(git rev-parse --short=7 HEAD)
+popd >/dev/null
+
+if [[ $git_tag != v* ]]; then
+  echo $git_tag does not look like a normal kernel tag. Please verify.
+  exit 1
+fi
+
+# Version number suitable for RPM:
+rpm_version=$(echo $git_tag | sed -e s/^v// -e s/-rc[0-9]*$//)
+
+# Directory name for the files inside ou tarball:
+tarball_dir=${kmod_name}-${rpm_version}-${git_short_commit}
+
+# Tarball file:
+tarball_file=${tarball_dir}.tar.xz
+
+# Debugging:
+echo RPM Version: ${rpm_version}
+echo Git short commit: ${git_short_commit}
+echo Tarball filename: ${tarball_file}
+echo Directory inside tarball: ${tarball_dir}
+
+if [[ -d ${tarball_dir} ]]; then
+  echo ${tarball_dir} already exists. Please remove it.
+  exit 1
+fi
+
+# Remove $TARBALL, if it exists, without asking.
+[[ -f ${tarball_file} ]] && rm ${tarball_file}
+
+cp -r ${git_clone}/${kmod_dir} ${tarball_dir}
+tar -cjf ${tarball_file} ${tarball_dir}
+rm -r ${tarball_dir}
+
+echo "wrote ${tarball_file}"

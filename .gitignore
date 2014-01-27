@@ -7,6 +7,9 @@
 # Auto-generated RPM spec file:
 /ceph-kmod.spec
 
+# Auto-generated Makefile
+/Makefile
+
 # Results from Mock:
 /results_ceph-kmod
 
