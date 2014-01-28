@@ -58,7 +58,7 @@ fi
 [[ -f ${tarball_file} ]] && rm ${tarball_file}
 
 cp -r ${git_clone}/${kmod_dir} ${tarball_dir}
-tar -cjf ${tarball_file} ${tarball_dir}
+tar -cJf ${tarball_file} ${tarball_dir}
 rm -r ${tarball_dir}
 
 echo "wrote ${tarball_file}"
