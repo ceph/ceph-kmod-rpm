@@ -10,7 +10,7 @@ set -e
 
 # Git repo information.
 git_clone=ceph-client
-git_ref=wip-rhel7
+git_ref=rhel7
 
 # kmod information.
 kmod_name=ceph

@@ -8,7 +8,7 @@ set -e
 
 # Git repo
 git_clone=ceph-client
-git_branch=wip-rhel7
+git_branch=rhel7
 
 # kmod information
 kmod_name=ceph
