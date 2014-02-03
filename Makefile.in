@@ -58,6 +58,7 @@ rpm: ${SRPM_FILE}
 # Cleanup:
 clean:
 	rm -rf \
+		Makefile \
 		sources \
 		${KMOD_NAME}-kmod.spec \
 		${KMOD_NAME}-*.src.rpm \
