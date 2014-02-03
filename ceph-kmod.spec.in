@@ -48,7 +48,7 @@ export CONFIG_CEPH_LIB=m
 # build ceph.ko
 export CONFIG_CEPH_FS=m
 %{__make} -C ${KSRC} %{?_smp_mflags} modules M=$PWD/fs/ceph/ \
-  KBUILD_EXTRA_SYMBOLS=net/ceph/Module.symvers
+  KBUILD_EXTRA_SYMBOLS=$PWD/net/ceph/Module.symvers
 
 %install
 export CONFIG_CEPH_FS=m
