@@ -57,7 +57,10 @@ fi
 # Remove $TARBALL, if it exists, without asking.
 [[ -f ${tarball_file} ]] && rm ${tarball_file}
 
-cp -r ${git_clone}/${kmod_dir} ${tarball_dir}
+mkdir -p ${tarball_dir}/fs
+mkdir -p ${tarball_dir}/net
+cp -r ${git_clone}/fs/ceph ${tarball_dir}/fs
+cp -r ${git_clone}/net/ceph ${tarball_dir}/net
 tar -cJf ${tarball_file} ${tarball_dir}
 rm -r ${tarball_dir}
 

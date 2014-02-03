@@ -37,16 +37,25 @@ echo "override %{kmod_name} * weak-updates/%{kmod_name}" \
 
 
 %build
-export CONFIG_CEPH_FS=m
 KSRC=%{_usrsrc}/kernels/%{kversion}.%{_target_cpu}
-%{__make} -C "${KSRC}" %{?_smp_mflags} modules M=$PWD
+
+# build net/ceph/Module.symvers
+export CONFIG_CEPH_LIB=m
+%{__make} -C ${KSRC} %{?_smp_mflags} modules M=$PWD/net/ceph/
+
+[[ -f net/ceph/Module.symvers ]] || exit 1
+
+# build ceph.ko
+export CONFIG_CEPH_FS=m
+%{__make} -C ${KSRC} %{?_smp_mflags} modules M=$PWD/fs/ceph/ \
+  KBUILD_EXTRA_SYMBOLS=net/ceph/Module.symvers
 
 %install
 export CONFIG_CEPH_FS=m
 export INSTALL_MOD_PATH=%{buildroot}
 export INSTALL_MOD_DIR=extra/%{kmod_name}
 KSRC=%{_usrsrc}/kernels/%{kversion}.%{_target_cpu}
-%{__make} -C "${KSRC}" modules_install M=$PWD
+%{__make} -C "${KSRC}" modules_install M=$PWD/fs/ceph/
 %{__install} -d %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} -m0644 kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} -d %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
