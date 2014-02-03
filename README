@@ -8,6 +8,12 @@ The 30 second synopsis:
   ./configure
   make
 
+Note that the make command uses "mock" under the hood, so you should run this
+as an unprivileged user and add your UID to the "mock" group. You will also
+need a mock configuration for EPEL 7  until the EPEL project itself ships a
+valid mock configuration for EPEL 7. See the "doc" subdirectory for more
+information about this.
+
 The repository follows the standard layout common to a regular package in the
 Fedora Linux distribution. The package uses a customized kmodtool script,
 modeled after the kmod packages in the ELRepo add-on repository.
