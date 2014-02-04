@@ -156,6 +156,7 @@ get_rpmtemplate ()
     cat <<EOF
 Provides:         kernel-modules >= ${verrel_dep}${dotvariant}
 Provides:         ${kmod_name}-kmod = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:         libceph-kmod = %{?epoch:%{epoch}:}%{version}
 Requires(post):   /usr/sbin/depmod
 Requires(postun): /usr/sbin/depmod
 EOF
