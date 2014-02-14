@@ -1,10 +1,11 @@
-This repository contains the RPM packaging for building CephFS as a
-kabi-tracking kmod for RHEL 7.
+This repository contains the RPM packaging for building libceph, ceph, and rbd
+as kabi-tracking kmods for RHEL 7.
 
 The 30 second synopsis:
 
-  git clone git://... ceph-kmod
+  git clone git://github.com/.../ceph-kmod-rpm.git ceph-kmod
   cd ceph-kmod
+  git clone git://github.com/ceph/ceph-client.git
   ./configure
   make
 
@@ -19,7 +20,7 @@ Fedora Linux distribution. The package uses a customized kmodtool script,
 modeled after the kmod packages in the ELRepo add-on repository.
 
 There are some notable differences between this package and a "standard"
-package you might find in the Fedora Linux distribution:
+package you might find in the Fedora Linux distribution or ELRepo:
 
 * This Git branch is labeled "master", but the package is not intended for
   Fedora Rawhide. The package is only for RHEL 7 for now.
@@ -45,3 +46,11 @@ package you might find in the Fedora Linux distribution:
   file. The ./configure script will generate the regular .spec file
   dynamically, filling in the appropriate templated values to match the values
   from Git.
+
+* A typical Fedora kmod package will have one binary kmod per package. This
+  package builds three binary kmods (libceph, ceph, rbd).
+
+* A typical Fedora kmod package will determine the %files list dynamically with
+  kmodtool. Since the package ships three kmods from one source RPM, we need
+  more control over the files list, so we use static files lists in txt files
+  for libceph, ceph, and rbd.

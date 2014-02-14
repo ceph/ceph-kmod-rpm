@@ -1,0 +1,4 @@
+%defattr(644,root,root,755)
+/lib/modules/%verrel%dotvariant/extra/ceph
+%config /etc/depmod.d/kmod-ceph.conf
+%doc /usr/share/doc/kmod-ceph-%{version}/

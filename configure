@@ -12,7 +12,6 @@ git_branch=rhel7
 
 # kmod information
 kmod_name=ceph
-kmod_dir=fs/ceph
 
 if [[ ! -d $git_clone ]]; then
   echo Please clone https://github.com/ceph/ceph-client to ${git_clone}.

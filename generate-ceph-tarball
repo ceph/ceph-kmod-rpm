@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Check out the tip of a git branch, and construct a simplified tarball that
-# only contains the fs/ceph directory. This will be Source0 for the RPM.
+# contains the necessary directories and files for the ceph, libceph, and rbd
+# kernel modules. This tarball will be Source0 for the RPM.
 
 # Some of this code is duplicated from the configure script. A future
 # improvement would be to merge the two somehow.
@@ -11,10 +12,6 @@ set -e
 # Git repo information.
 git_clone=ceph-client
 git_ref=rhel7
-
-# kmod information.
-kmod_name=ceph
-kmod_dir=fs/ceph
 
 if [[ ! -d $git_clone ]]; then
   echo Please clone https://github.com/ceph/ceph-client to ${git_clone}.
@@ -37,8 +34,8 @@ fi
 # Version number suitable for RPM:
 rpm_version=$(echo $git_tag | sed -e s/^v// -e s/-rc[0-9]*$//)
 
-# Directory name for the files inside ou tarball:
-tarball_dir=${kmod_name}-${rpm_version}-${git_short_commit}
+# Directory name for the files inside our tarball:
+tarball_dir=ceph-${rpm_version}-${git_short_commit}
 
 # Tarball file:
 tarball_file=${tarball_dir}.tar.xz
@@ -57,11 +54,35 @@ fi
 # Remove $TARBALL, if it exists, without asking.
 [[ -f ${tarball_file} ]] && rm ${tarball_file}
 
-mkdir -p ${tarball_dir}/fs
-mkdir -p ${tarball_dir}/net
-cp -r ${git_clone}/fs/ceph ${tarball_dir}/fs
-cp -r ${git_clone}/net/ceph ${tarball_dir}/net
+mkdir ${tarball_dir}
+
+# License file
 cp ${git_clone}/COPYING ${tarball_dir}/COPYING
+
+# Libceph
+mkdir -p ${tarball_dir}/net
+cp -r ${git_clone}/net/ceph ${tarball_dir}/net/
+
+# Ceph
+mkdir -p ${tarball_dir}/fs
+cp -r ${git_clone}/fs/ceph ${tarball_dir}/fs/
+
+# RBD
+mkdir -p ${tarball_dir}/drivers/block
+cp ${git_clone}/drivers/block/rbd.c       ${tarball_dir}/drivers/block/
+cp ${git_clone}/drivers/block/rbd_types.h ${tarball_dir}/drivers/block/
+cp ${git_clone}/drivers/block/Kconfig     ${tarball_dir}/drivers/block/
+cp ${git_clone}/drivers/block/Makefile    ${tarball_dir}/drivers/block/
+# The standard drivers/block/Makefile contains a lot of rules.
+# Simplify the Makefile so that we're only building RBD.
+sed -i '/rbd\.o/!d' ${tarball_dir}/drivers/block/Makefile
+
+# Headers
+mkdir -p ${tarball_dir}/include/linux
+cp -r ${git_clone}/include/linux/ceph  ${tarball_dir}/include/linux/
+cp -r ${git_clone}/include/linux/crush ${tarball_dir}/include/linux/
+
+# Tar it up
 tar -cJf ${tarball_file} ${tarball_dir}
 rm -r ${tarball_dir}
 
