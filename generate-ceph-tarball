@@ -61,6 +61,7 @@ mkdir -p ${tarball_dir}/fs
 mkdir -p ${tarball_dir}/net
 cp -r ${git_clone}/fs/ceph ${tarball_dir}/fs
 cp -r ${git_clone}/net/ceph ${tarball_dir}/net
+cp ${git_clone}/COPYING ${tarball_dir}/COPYING
 tar -cJf ${tarball_file} ${tarball_dir}
 rm -r ${tarball_dir}
 

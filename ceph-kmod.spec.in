@@ -15,8 +15,6 @@ BuildRequires: redhat-rpm-config
 
 # Sources.
 Source0:  @tarball_file@
-# https://raw.github.com/ceph/ceph-client/for-linus/COPYING
-Source5:  %{kmod_name}-COPYING
 Source10: %{kmod_name}-kmodtool-el7.sh
 
 # Magic hidden here.
@@ -60,7 +58,7 @@ KSRC=%{_usrsrc}/kernels/%{kversion}.%{_target_cpu}
 %{__install} -m0644 kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} -d %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/
 # License file
-%{__install} -m0644 %{SOURCE5} %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/COPYING
+%{__install} -m0644 COPYING %{buildroot}%{_defaultdocdir}/kmod-%{kmod_name}-%{version}/COPYING
 # Set the module to be executable, so that it will be stripped when packaged.
 find %{buildroot} -type f -name \*.ko -exec %{__chmod} u+x \{\} \;
 # Remove unnecessary files.
