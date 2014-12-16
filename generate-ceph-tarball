@@ -22,7 +22,8 @@ fi
 # Get version information
 pushd $git_clone >/dev/null
   git checkout $git_branch
-  git_tag=$(git describe --abbrev=0 --tags HEAD)
+  # We hardcode this git_tag because RHEL 7 is all that we support.
+  git_tag=v3.10.0
   git_short_commit=$(git rev-parse --short=7 HEAD)
 popd >/dev/null
 
