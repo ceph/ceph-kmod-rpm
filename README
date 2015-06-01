@@ -1,58 +1,12 @@
-This repository contains the RPM packaging for building libceph, ceph, and rbd
-as kabi-tracking kmods for RHEL 7.
+This repository used to contain 3rd-party Ceph kernel module packages for RHEL
+7.0.
 
-The 30 second synopsis:
+As of RHEL 7.1, libceph.ko and rbd.ko are now included in Red Hat's kernel
+packages natively. The RHEL 7.1 kernel packages are more stable and secure than
+using these 3rd-party kmods with RHEL 7.0. Please update your systems to RHEL
+7.1 or later if you want to use the kernel RBD client.
 
-  git clone git://github.com/.../ceph-kmod-rpm.git ceph-kmod
-  cd ceph-kmod
-  git clone git://github.com/ceph/ceph-client.git
-  ./configure
-  make
-
-You will find the RPMs in a "results_ceph-kmod" directory.
-
-Note that the make command uses "mock" under the hood, so you should run this
-as an unprivileged user and add your UID to the "mock" group. You will also
-need a mock configuration for EPEL 7  until the EPEL project itself ships a
-valid mock configuration for EPEL 7. See the "doc" subdirectory for more
-information about this.
-
-The repository follows the standard layout common to a regular package in the
-Fedora Linux distribution. The package uses a customized kmodtool script,
-modeled after the kmod packages in the ELRepo add-on repository.
-
-There are some notable differences between this package and a "standard"
-package you might find in the Fedora Linux distribution or ELRepo:
-
-* This Git branch is labeled "master", but the package is not intended for
-  Fedora Rawhide. The package is only for RHEL 7 for now.
-
-* In a typical Fedora package, you would edit the version numbers in the
-  package by hand, and then run "fedpkg", perhaps with additional arguments. To
-  abstract this away and make it easier to automate for continuous integration,
-  you will find a configure script and Makefile. Just run "./configure && make"
-  to go through the process of building the entire binary RPMs.
-
-* After you run ./configure, you will have a Makefile. A Jenkins job runs
-  "./configure && make" in order to build the entire tarball, source RPM, and
-  binary RPM in mock.
-
-* In a typical Fedora package, the Source0 tarball would be stored in a
-  lookaside cache in the build infrastructure. With this ceph-kmod package,
-  the source tarball is not stored anywhere. Instead, you can generate a
-  tarball on the fly using the "make tarball" command. (This is a dependency
-  for the "make all"... or "make rpm"... or even just "make". So if you're
-  running any of those, you don't need to run "make tarball" beforehand.)
-
-* Instead of a standard ceph-kmod.spec, there is a "ceph-kmod.spec.in"
-  file. The ./configure script will generate the regular .spec file
-  dynamically, filling in the appropriate templated values to match the values
-  from Git.
-
-* A typical Fedora kmod package will have one binary kmod per package. This
-  package builds three binary kmods (libceph, ceph, rbd).
-
-* A typical Fedora kmod package will determine the %files list dynamically with
-  kmodtool. Since the package ships three kmods from one source RPM, we need
-  more control over the files list, so we use static files lists in txt files
-  for libceph, ceph, and rbd.
+The CephFS kernel client is undergoing rapid development upstream, and we do
+not recommend running the CephFS kernel module on RHEL 7's 3.10 kernel at this
+time. Please use ELRepo's latest upstream 4.x kernels if you want to run CephFS
+on RHEL 7.

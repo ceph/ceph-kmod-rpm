@@ -1,5 +1,0 @@
-Fedora/EPEL have not yet shipped mock configs for EL7. See
-https://lists.fedoraproject.org/pipermail/epel-devel/2014-January/009067.html
-
-In the mean time, here is the custom epel-7-x86_64.cfg file that I use to build
-the ceph-kmod RPM. Drop this into /etc/mock/epel-7-x86_64.cfg.

@@ -1,4 +1,0 @@
-%defattr(644,root,root,755)
-/lib/modules/%verrel%dotvariant/extra/rbd
-%config /etc/depmod.d/kmod-rbd.conf
-%doc /usr/share/doc/kmod-rbd-%{version}/
